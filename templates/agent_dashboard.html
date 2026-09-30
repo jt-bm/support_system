@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة تحكم إدارة التذاكر المؤسسية</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Cairo', sans-serif; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans antialiased min-h-screen flex flex-col">
+
+    <header class="bg-white border-b border-slate-200 px-8 py-4 flex justify-between items-center shadow-sm">
+        <div class="flex items-center space-x-3 space-x-reverse">
+            <!-- تم استبدال حرف "ل" بشعار الشركة (صورة أو أيقونة رسمية) مع الحفاظ على التنسيق -->
+            <div class="w-10 h-10 bg-amber-600 rounded-lg flex items-center justify-center text-white font-bold text-base shadow-sm overflow-hidden">
+                <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Loden Logo" class="w-full h-full object-contain p-1" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                
+            </div>
+            <div>
+                <h1 class="text-xl font-bold tracking-wide text-slate-800">لوحة تحكم إدارة التذاكر المؤسسية</h1>
+                <p class="text-xs text-slate-500">متابعة دقيقة لبلاغات الأقسام، التدقيق الزمني، وحفظ الحقوق - لدن العربية</p>
+            </div>
+        </div>
+        <div class="flex items-center gap-3">
+            <!-- يظهر زر إدارة المستخدمين للأدمن فقط بناءً على صلاحيات الجلسة -->
+            {% if session.get('role') == 'admin' %}
+            <a href="{{ url_for('admin_users') }}" class="bg-amber-600 hover:bg-amber-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition shadow-sm flex items-center gap-1">
+                <span>إدارة المستخدمين</span>
+            </a>
+            
+            <!-- زر النسخ الاحتياطي اليدوي المضاف حديثاً للأدمن -->
+            <form action="{{ url_for('admin_backup_database') }}" method="POST" style="display: inline;">
+                <button type="submit" class="bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition shadow-sm flex items-center gap-1">
+                    <span> نسخة احتياطية</span>
+                </button>
+            </form>
+            {% endif %}
+
+            <a href="/" target="_blank" class="bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-medium px-4 py-2 rounded-lg border border-slate-200 transition">
+                <span>بوابة الطلبات الخارجية</span>
+            </a>
+            
+            <a href="{{ url_for('logout') }}" class="bg-red-50 hover:bg-red-100 text-red-600 text-sm font-medium px-4 py-2 rounded-lg border border-red-200 transition">
+                <span>تسجيل الخروج</span>
+            </a>
+        </div>
+    </header>
+
+    <main class="flex-grow container mx-auto px-4 py-8 max-w-7xl space-y-6">
+        
+        <!-- Stats Row -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="bg-white border border-slate-200 p-6 rounded-xl shadow-sm flex items-center justify-between">
+                <div>
+                    <p class="text-sm text-slate-500">إجمالي التذاكر المسجلة</p>
+                    <h3 class="text-3xl font-bold text-slate-800 mt-1">{{ total_tickets }}</h3>
+                </div>
+                <div class="p-3 bg-slate-50 text-slate-700 rounded-lg border border-slate-200 font-bold"></div>
+            </div>
+            <div class="bg-white border border-slate-200 p-6 rounded-xl shadow-sm flex items-center justify-between">
+                <div>
+                    <p class="text-sm text-slate-500">التذاكر النشطة وتحت العمل</p>
+                    <h3 class="text-3xl font-bold text-amber-600 mt-1">{{ open_tickets }}</h3>
+                </div>
+                <div class="p-3 bg-amber-50 text-amber-600 rounded-lg border border-amber-100 font-bold"></div>
+            </div>
+            <div class="bg-white border border-slate-200 p-6 rounded-xl shadow-sm flex items-center justify-between">
+                <div>
+                    <p class="text-sm text-slate-500">التذاكر المغلقة والمكتملة</p>
+                    <h3 class="text-3xl font-bold text-emerald-600 mt-1">{{ closed_tickets }}</h3>
+                </div>
+                <div class="p-3 bg-emerald-50 text-emerald-600 rounded-lg border border-emerald-100 font-bold"></div>
+            </div>
+        </div>
+
+        <!-- Advanced Filter & Search Bar with Date Range -->
+        <div class="bg-white border border-slate-200 p-4 rounded-xl shadow-sm space-y-4">
+            <form method="GET" action="{{ url_for('agent_dashboard') }}" class="grid grid-cols-1 md:grid-cols-5 gap-4 items-center">
+                <div class="md:col-span-2">
+                    <input type="text" name="search" value="{{ current_search }}" placeholder="بحث باسم العميل، الشركة، أو القسم..." class="w-full bg-slate-50 border border-slate-300 rounded-lg px-4 py-2 text-sm text-slate-800 focus:outline-none focus:border-amber-500">
+                </div>
+                <div>
+                    <input type="date" name="from_date" value="{{ from_date }}" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-sm text-slate-700" title="من تاريخ">
+                </div>
+                <div>
+                    <input type="date" name="to_date" value="{{ to_date }}" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-sm text-slate-700" title="إلى تاريخ">
+                </div>
+                <div class="flex gap-2">
+                    <button type="submit" class="flex-grow bg-amber-600 hover:bg-amber-700 text-sm font-medium text-white py-2 rounded-lg transition shadow-sm">تطبيق الفلترة</button>
+                    <a href="{{ url_for('agent_dashboard') }}" class="bg-slate-200 hover:bg-slate-300 text-slate-700 text-sm px-3 py-2 rounded-lg transition flex items-center justify-center">إلغاء</a>
+                </div>
+            </form>
+
+            <div class="flex items-center gap-2 text-sm pt-2 border-t border-slate-100">
+                <span class="text-slate-500 font-medium">حالة التذكرة:</span>
+                <a href="{{ url_for('agent_dashboard', status='All', search=current_search, from_date=from_date, to_date=to_date) }}" class="px-3 py-1 rounded-md border {{ 'bg-amber-600 border-amber-600 text-white' if current_status == 'All' else 'bg-white border-slate-300 text-slate-700' }}">الكل</a>
+                <a href="{{ url_for('agent_dashboard', status='Active', search=current_search, from_date=from_date, to_date=to_date) }}" class="px-3 py-1 rounded-md border {{ 'bg-amber-500 border-amber-500 text-white' if current_status == 'Active' else 'bg-white border-slate-300 text-slate-700' }}">النشطة فقط</a>
+                <a href="{{ url_for('agent_dashboard', status='Closed', search=current_search, from_date=from_date, to_date=to_date) }}" class="px-3 py-1 rounded-md border {{ 'bg-emerald-600 border-emerald-600 text-white' if current_status == 'Closed' else 'bg-white border-slate-300 text-slate-700' }}">المغلقة</a>
+            </div>
+        </div>
+
+        <!-- Tickets Table -->
+        <div class="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
+            <div class="p-4 border-b border-slate-200 font-bold text-slate-700 bg-slate-50 flex justify-between items-center">
+                <span>سجل التذاكر والمتابعة الزمنية</span>
+                <span class="text-xs text-slate-500 font-normal">عرض تذاكر الموظفين ومراقبة تكرار الأعطال</span>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-right border-collapse">
+                    <thead>
+                        <tr class="bg-slate-100 text-slate-600 text-xs uppercase tracking-wider border-b border-slate-200">
+                            <th class="p-4"># / التاريخ والوقت</th>
+                            <th class="p-4">مقدم الطلب والجهة</th>
+                            <th class="p-4">التصنيف والأولوية</th>
+                            <th class="p-4">تحليل الذكاء الاصطناعي</th>
+                            <th class="p-4">الحالة والتقدم</th>
+                            <th class="p-4">الفني المسؤول وتفاصيل الحل</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-200 text-sm">
+                        {% for ticket in tickets %}
+                        <tr class="hover:bg-slate-50 transition">
+                            <td class="p-4 font-mono text-slate-500">
+                                <span class="font-bold text-slate-800">#{{ ticket.id }}</span>
+                                <div class="text-xs text-slate-400 mt-1">{{ ticket.created_at }}</div>
+                            </td>
+                            <td class="p-4">
+                                <div class="font-bold text-slate-800">{{ ticket.client_name }}</div>
+                                <div class="text-xs text-slate-500">{{ ticket.company_name }} - {{ ticket.department }}</div>
+                                <div class="text-xs text-slate-600 mt-1 bg-slate-50 p-2 rounded border border-slate-200">الوصف: {{ ticket.issue_description }}</div>
+                                {% if ticket.attachment %}
+                                <div class="mt-2">
+                                    <a href="{{ url_for('static', filename='uploads/' + ticket.attachment) }}" target="_blank" class="text-xs text-amber-600 underline font-medium">عرض المرفق</a>
+                                </div>
+                                {% endif %}
+                            </td>
+                            <td class="p-4">
+                                <div class="text-slate-800 font-medium">{{ ticket.category }}</div>
+                                <span class="inline-block mt-1 px-2.5 py-0.5 rounded text-xs font-semibold 
+                                    {% if ticket.priority == 'حرجة وعاجلة' %} bg-rose-50 text-rose-700 border border-rose-200
+                                    {% elif ticket.priority == 'متوسط' %} bg-amber-50 text-amber-700 border border-amber-200
+                                    {% else %} bg-slate-100 text-slate-700 border border-slate-300 {% endif %}">
+                                    {{ ticket.priority }}
+                                </span>
+                            </td>
+                            <td class="p-4 max-w-xs text-xs text-slate-700 bg-amber-50/30 rounded p-2 border border-amber-100">
+                                {{ ticket.ai_summary }}
+                            </td>
+                            <td class="p-4">
+                                <form action="{{ url_for('update_ticket', ticket_id=ticket.id) }}" method="POST" class="space-y-2">
+                                    <select name="status" class="bg-white border border-slate-300 rounded px-2 py-1 text-xs text-slate-800 w-full">
+                                        <option value="New / جديد" {{ 'selected' if ticket.status == 'New / جديد' }}>New / جديد</option>
+                                        <option value="In Progress / قيد المعالجة" {{ 'selected' if ticket.status == 'In Progress / قيد المعالجة' }}>In Progress / قيد المعالجة</option>
+                                        <option value="Resolved / تم الحل" {{ 'selected' if ticket.status == 'Resolved / تم الحل' }}>Resolved / تم الحل (بانتظار إغلاق الموظف)</option>
+                                        <option value="Closed / مغلق نهائياً" {{ 'selected' if ticket.status == 'Closed / مغلق نهائياً' }}>Closed / مغلق نهائياً</option>
+                                    </select>
+                                    <div class="flex items-center gap-2">
+                                        <input type="number" name="progress" min="0" max="100" value="{{ ticket.progress }}" class="w-16 bg-white border border-slate-300 rounded px-2 py-1 text-xs text-center text-slate-800" placeholder="%">
+                                        <span class="text-xs text-slate-500">% الإنجاز</span>
+                                    </div>
+                            </td>
+                            <td class="p-4 space-y-2">
+                                    <input type="text" name="technician_name" value="{{ ticket.technician_name or '' }}" placeholder="اسم الفني المسؤول" class="w-full bg-white border border-slate-300 rounded px-2 py-1 text-xs text-slate-800" readonly>
+                                    <input type="text" name="technician_notes" value="{{ ticket.technician_notes or '' }}" placeholder="تقرير الحل التقني..." class="w-full bg-white border border-slate-300 rounded px-2 py-1 text-xs text-slate-800">
+                                    <button type="submit" class="w-full bg-slate-800 hover:bg-slate-700 text-white text-xs font-medium py-1.5 rounded transition">حفظ وتحديث التذكرة</button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="6" class="p-8 text-center text-slate-400">لا توجد أي تذاكر مسجلة مطابقة لخيارات البحث أو الفلترة.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </main>
+
+    <footer class="bg-white border-t border-slate-200 py-3 text-center text-[11px] text-slate-500 mt-auto">
+        جميع الحقوق محفوظة © 2026 - نظام إدارة الدعم الفني المؤسسي
+    </footer>
+</body>
+</html>

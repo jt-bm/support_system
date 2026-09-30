@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="{{ session.get('lang', 'ar') }}" dir="{{ 'rtl' if session.get('lang', 'ar') == 'ar' else 'ltr' }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ 'تسجيل الدخول - نظام الدعم الفني لدن' if session.get('lang', 'ar') == 'ar' else 'Login - Ladan IT Helpdesk System' }}</title>
+    
+    <!-- خط Cairo لتناسق الواجهة -->
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+
+    <!-- دمج الأنماط الأساسية والتصميم المخصص -->
+    <style>
+        *,::after,::before{box-sizing:border-box;border-width:0;border-style:solid;border-color:#e5e7eb}
+        html{line-height:1.5;-webkit-text-size-adjust:100%;font-family:'Cairo', sans-serif;}
+        body{margin:0;line-height:inherit;background-color:#f1f5f9;color:#1e293b;min-height:100vh;display:flex;flex-direction:column;justify-content:space-between;}
+        h1,h2,p{margin:0}
+        button,input{font-family:inherit;font-size:100%;font-weight:inherit;line-height:inherit;color:inherit;margin:0;padding:0}
+        button{text-transform:none;-webkit-appearance:button;background-color:transparent;background-image:none}
+        input::placeholder{color:#9ca3af;opacity:1}
+        
+        /* Header Styles */
+        .ladan-header {
+            border-bottom: 1px solid #e2e8f0;
+            background-color: #ffffff;
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            padding: 0.85rem 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .ladan-logo-area {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .ladan-logo-img {
+            height: 45px;
+            object-fit: contain;
+        }
+        
+        .ladan-logo-text {
+            text-align: right;
+            border-right: 3px solid #d97706; /* خط بتصميم متناسق مع هوية لدن */
+            padding-right: 0.75rem;
+        }
+
+        [dir="ltr"] .ladan-logo-text {
+            text-align: left;
+            border-right: none;
+            border-left: 3px solid #d97706;
+            padding-right: 0;
+            padding-left: 0.75rem;
+        }
+        
+        .ladan-logo-title {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: #0f172a;
+        }
+        
+        .ladan-logo-subtitle {
+            font-size: 0.7rem;
+            color: #d97706;
+            font-weight: 600;
+        }
+        
+        /* Main Login Card Styles */
+        .ladan-main-content {
+            max-width: 28rem;
+            width: 100%;
+            margin: auto;
+            padding: 2rem 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .ladan-login-card {
+            background-color: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 1.5rem;
+            padding: 2rem;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 10px 10px -5px rgba(0, 0, 0, 0.02);
+            width: 100%;
+            text-align: center;
+        }
+        
+        .ladan-card-title {
+            font-size: 1.125rem;
+            font-weight: 700;
+            color: #0f172a;
+            margin-bottom: 0.35rem;
+        }
+        
+        .ladan-card-subtitle {
+            font-size: 0.75rem;
+            color: #64748b;
+            margin-bottom: 1.5rem;
+        }
+        
+        /* Form Elements */
+        .ladan-form-group {
+            margin-bottom: 1.15rem;
+            text-align: right;
+        }
+
+        [dir="ltr"] .ladan-form-group {
+            text-align: left;
+        }
+        
+        .ladan-label {
+            display: block;
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: #334155;
+            margin-bottom: 0.375rem;
+        }
+        
+        .ladan-input {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            background-color: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 0.75rem;
+            color: #1e293b;
+            font-size: 0.875rem;
+            transition: all 0.2s;
+        }
+        
+        .ladan-input:focus {
+            outline: none;
+            border-color: #d97706;
+            box-shadow: 0 0 0 3px rgba(217, 119, 6, 0.15);
+        }
+        
+        .ladan-error-box {
+            margin-bottom: 1.25rem;
+            padding: 0.75rem;
+            background-color: #fef2f2;
+            border: 1px solid #fecaca;
+            color: #dc2626;
+            border-radius: 0.75rem;
+            font-size: 0.75rem;
+            text-align: center;
+            font-weight: 500;
+        }
+        
+        .ladan-submit-btn {
+            width: 100%;
+            background-color: #d97706;
+            color: #ffffff;
+            font-weight: 700;
+            padding: 0.75rem;
+            border-radius: 0.75rem;
+            transition: background-color 0.15s;
+            cursor: pointer;
+            margin-top: 0.5rem;
+            box-shadow: 0 4px 6px -1px rgba(217, 119, 6, 0.2);
+            font-size: 0.875rem;
+        }
+        
+        .ladan-submit-btn:hover {
+            background-color: #b45309;
+        }
+        
+        /* Footer Styles */
+        .ladan-footer {
+            text-align: center;
+            padding: 1.25rem 1rem;
+            font-size: 0.7rem;
+            color: #64748b;
+            border-top: 1px solid #e2e8f0;
+            background-color: #ffffff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .footer-branding {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .ladan-footer-logo {
+            height: 20px;
+            object-fit: contain;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- الهيدر العلوي (شعار شركة لدن العربية لتقنية المعلومات) -->
+    <header class="ladan-header">
+        <div style="max-width: 80rem; width: 100%; margin: 0 auto; display: flex; justify-content: space-between; align-items: center;">
+            
+            <div class="ladan-logo-area">
+                <!-- شعار شركة لدن العربية -->
+                <img src="{{ url_for('static', filename='images/ladan_logo.png') }}" alt="Ladan Logo" class="ladan-logo-img">
+                <div class="ladan-logo-text">
+                    <h1 class="ladan-logo-title">{{ 'نظام الدعم الفني والبلاغات - Ladan' if session.get('lang', 'ar') == 'ar' else 'Ladan IT Helpdesk System' }}</h1>
+                    <p class="ladan-logo-subtitle">{{ 'بوابة إدارة البلاغات والدعم الفني' if session.get('lang', 'ar') == 'ar' else 'IT Ticketing & Support Portal' }}</p>
+                </div>
+            </div>
+
+            <!-- زر تبديل اللغة في صفحة تسجيل الدخول (اختياري ومرتب) -->
+            <div>
+                <a href="{{ url_for('set_language', lang='en' if session.get('lang', 'ar') == 'ar' else 'ar') }}" class="bg-slate-100 hover:bg-slate-200 text-amber-700 px-3.5 py-2 rounded-xl border border-slate-200 text-xs font-semibold transition">
+                    {{ 'English' if session.get('lang', 'ar') == 'ar' else 'العربية' }}
+                </a>
+            </div>
+
+        </div>
+    </header>
+
+    <!-- محتوى تسجيل الدخول -->
+    <main class="ladan-main-content">
+        <div class="ladan-login-card">
+            
+            <div style="margin-bottom: 1.5rem;">
+                <h2 class="ladan-card-title">{{ 'تسجيل الدخول للنظام' if session.get('lang', 'ar') == 'ar' else 'System Login' }}</h2>
+                <p class="ladan-card-subtitle">{{ 'سجل الدخول للمتابعة وإدارة البلاغات التقنية' if session.get('lang', 'ar') == 'ar' else 'Sign in to continue and manage technical tickets' }}</p>
+            </div>
+
+            {% if error %}
+                <div class="ladan-error-box">
+                    {{ error }}
+                </div>
+            {% endif %}
+
+            <form action="/login" method="POST">
+                <div class="ladan-form-group">
+                    <label class="ladan-label">{{ 'اسم المستخدم (Username)' if session.get('lang', 'ar') == 'ar' else 'Username' }}</label>
+                    <input type="text" name="username" required placeholder="{{ 'أدخل اسم المستخدم' if session.get('lang', 'ar') == 'ar' else 'Enter username' }}" class="ladan-input">
+                </div>
+                
+                <div class="ladan-form-group">
+                    <label class="ladan-label">{{ 'كلمة المرور (Password)' if session.get('lang', 'ar') == 'ar' else 'Password' }}</label>
+                    <input type="password" name="password" required placeholder="••••••••" class="ladan-input">
+                </div>
+
+                <button type="submit" class="ladan-submit-btn">
+                    {{ 'تسجيل الدخول' if session.get('lang', 'ar') == 'ar' else 'Login' }}
+                </button>
+            </form>
+
+        </div>
+    </main>
+
+    <!-- التذييل السفلي -->
+    <footer class="ladan-footer">
+        <div class="footer-branding">
+            <span>{{ 'تشغيل ودعم تقني بواسطة:' if session.get('lang', 'ar') == 'ar' else 'Powered & Supported by:' }}</span>
+            <img src="{{ url_for('static', filename='images/ladan_logo.png') }}" alt="Ladan Arabic Logo" class="ladan-footer-logo">
+        </div>
+        <div>
+            {{ 'جميع الحقوق محفوظة © 2026 - شركة لدن العربية لتقنية المعلومات' if session.get('lang', 'ar') == 'ar' else 'Ladan Arabic for IT © 2026 - All Rights Reserved' }}
+        </div>
+    </footer>
+
+</body>
+</html>

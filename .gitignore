@@ -1,0 +1,7 @@
+database.db
+backups/
+__pycache__/
+*.pyc
+static/uploads/*
+.agents/
+skills-lock.json
